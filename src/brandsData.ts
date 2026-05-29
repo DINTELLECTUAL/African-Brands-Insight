@@ -1,7 +1,48 @@
 import { BrandPerception, PublicFeedback, MonthlySentiment } from './types';
 
-// Production-clean baseline. No seeded/demo brands, completely empty list.
-export const BRANDS_DATA: BrandPerception[] = [];
+// Production-clean baseline representing pre-configured high-interest entities.
+export const BRANDS_DATA: BrandPerception[] = [
+  {
+    id: 'mtn-nigeria',
+    name: 'MTN Nigeria',
+    sector: 'Telecom',
+    country: 'Pan-African',
+    logoChar: 'M',
+    overallScore: 0,
+    sentimentLabel: 'Insufficient Data',
+    metrics: {
+      trust: 0,
+      responsiveness: 0,
+      innovation: 0,
+      socialResponsibility: 0
+    },
+    traits: [],
+    aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
+    trendData: [],
+    praises: [],
+    suggestions: []
+  },
+  {
+    id: 'burna-boy',
+    name: 'Burna Boy (Spaceship Ent.)',
+    sector: 'Entertainment',
+    country: 'Pan-African',
+    logoChar: 'B',
+    overallScore: 0,
+    sentimentLabel: 'Insufficient Data',
+    metrics: {
+      trust: 0,
+      responsiveness: 0,
+      innovation: 0,
+      socialResponsibility: 0
+    },
+    traits: [],
+    aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
+    trendData: [],
+    praises: [],
+    suggestions: []
+  }
+];
 
 // Helper to calculate dynamic metrics strictly from real user-contributed feedback
 export function calculateDynamicMetrics(praises: PublicFeedback[] = [], suggestions: PublicFeedback[] = []) {

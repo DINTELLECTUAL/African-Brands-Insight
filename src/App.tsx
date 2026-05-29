@@ -19,58 +19,14 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.map((b: BrandPerception) => {
-            const hasMTNName = b.id === 'mtn-nigeria' || b.name?.toLowerCase().trim() === 'mtn nigeria';
-            const hasBurnaName = b.id === 'burna-boy' || b.id?.includes('burna') || b.name?.toLowerCase().includes('burna boy');
-            
-            if (hasMTNName) {
-              return {
-                id: 'mtn-nigeria',
-                name: 'MTN Nigeria',
-                sector: 'Telecom',
-                country: 'Pan-African',
-                logoChar: 'M',
-                overallScore: 0,
-                sentimentLabel: 'Insufficient Data',
-                metrics: {
-                  trust: 0,
-                  responsiveness: 0,
-                  innovation: 0,
-                  socialResponsibility: 0
-                },
-                traits: [],
-                aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
-                trendData: [],
-                praises: [],
-                suggestions: []
-              };
+          // Ensure new baseline brands are merged. Preserve existing submissions.
+          const merged = [...parsed];
+          BRANDS_DATA.forEach((baseline) => {
+            if (!merged.some((b) => b.id === baseline.id)) {
+              merged.push(baseline);
             }
-
-            if (hasBurnaName) {
-              return {
-                id: b.id || 'burna-boy',
-                name: b.name || 'Burna Boy (Spaceship Ent.)',
-                sector: b.sector || 'Entertainment',
-                country: 'Pan-African',
-                logoChar: 'B',
-                overallScore: 0,
-                sentimentLabel: 'Insufficient Data',
-                metrics: {
-                  trust: 0,
-                  responsiveness: 0,
-                  innovation: 0,
-                  socialResponsibility: 0
-                },
-                traits: [],
-                aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
-                trendData: [],
-                praises: [],
-                suggestions: []
-              };
-            }
-
-            return b;
           });
+          return merged;
         }
       } catch (e) {
         console.error("Local registry read failure, fallback to BRANDS_DATA", e);
