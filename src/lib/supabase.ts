@@ -172,3 +172,36 @@ export async function syncAllBrandsToSupabase(brands: BrandPerception[]): Promis
     return false;
   }
 }
+
+/**
+ * Subscribe to real-time updates for the 'brands' table in Supabase.
+ * Whenever a record is inserted or updated in the database, triggers the callback.
+ */
+export function subscribeToSupabaseBrands(
+  onUpdate: (updatedBrand: BrandPerception) => void
+) {
+  if (!supabase) return null;
+
+  const channel = supabase
+    .channel('realtime:public:brands')
+    .on(
+      'postgres_changes',
+      {
+        event: '*', // Listen to INSERT, UPDATE, DELETE
+        schema: 'public',
+        table: 'brands'
+      },
+      (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          if (payload.new) {
+            const mapped = mapFromDB(payload.new);
+            onUpdate(mapped);
+          }
+        }
+      }
+    )
+    .subscribe();
+
+  return channel;
+}
+

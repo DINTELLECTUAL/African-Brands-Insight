@@ -7,7 +7,7 @@ import { SupabaseInfoModal } from './components/SupabaseInfoModal';
 
 import { BRANDS_DATA, findOrCreateBrand, calculateDynamicMetrics } from './brandsData';
 import { BrandPerception, PublicFeedback } from './types';
-import { isSupabaseConfigured, getSupabaseBrands, saveSupabaseBrand, syncAllBrandsToSupabase } from './lib/supabase';
+import { isSupabaseConfigured, getSupabaseBrands, saveSupabaseBrand, syncAllBrandsToSupabase, subscribeToSupabaseBrands, supabase } from './lib/supabase';
 
 export default function App() {
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function App() {
     setIsHydrated(true);
   }, []);
 
-  // Fetch real-time synchronized data from Supabase on start if configured
+  // Fetch real-time synchronized data from Supabase on start if configured and subscribe to real-time additions/modifications
   useEffect(() => {
     async function loadSupabaseData() {
       if (isSupabaseConfigured) {
@@ -58,6 +58,28 @@ export default function App() {
       }
     }
     loadSupabaseData();
+
+    // Subscribe to real-time changes after hydration occurs
+    if (isSupabaseConfigured && isHydrated) {
+      const channel = subscribeToSupabaseBrands((updatedBrand) => {
+        setBrands((prev) => {
+          const index = prev.findIndex((b) => b.id === updatedBrand.id);
+          if (index !== -1) {
+            const updated = [...prev];
+            updated[index] = updatedBrand;
+            return updated;
+          } else {
+            return [...prev, updatedBrand];
+          }
+        });
+      });
+
+      return () => {
+        if (channel) {
+          supabase?.removeChannel(channel);
+        }
+      };
+    }
   }, [isHydrated]); // Load after hydration
 
   // Keep LocalStorage in sync (only after safe hydration occurs to prevent accidental clean wipes)
