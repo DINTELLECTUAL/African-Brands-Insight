@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { BrandDashboard } from './components/BrandDashboard';
 import { LiveActivityPerception } from './components/LiveActivityPerception';
 import { SupabaseInfoModal } from './components/SupabaseInfoModal';
+import { InsightAlertsSection } from './components/InsightAlertsSection';
 
 import { BRANDS_DATA, findOrCreateBrand, calculateDynamicMetrics } from './brandsData';
 import { BrandPerception, PublicFeedback } from './types';
@@ -281,6 +282,7 @@ export default function App() {
       ) : (
         <main>
           <Hero onSearchAndRedirect={handleSearchAndRedirect} existingBrands={brands} />
+          <InsightAlertsSection brands={brands} />
         </main>
       )}
 
