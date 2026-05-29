@@ -1,12 +1,14 @@
-import { Compass } from 'lucide-react';
+import { Compass, Database, Link2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 interface NavbarProps {
   currentBrandSlug: string;
   onBackToHome: () => void;
+  onOpenSupabaseModal: () => void;
 }
 
-export function Navbar({ currentBrandSlug, onBackToHome }: NavbarProps) {
+export function Navbar({ currentBrandSlug, onBackToHome, onOpenSupabaseModal }: NavbarProps) {
   return (
     <motion.header
       id="navbar"
@@ -32,7 +34,22 @@ export function Navbar({ currentBrandSlug, onBackToHome }: NavbarProps) {
         </button>
 
         {/* Dynamic Action Area */}
-        <div className="flex items-center justify-center sm:justify-end gap-4 w-full sm:w-auto">
+        <div className="flex items-center justify-center sm:justify-end gap-3.5 w-full sm:w-auto">
+          {/* Database Synchronization Status Button - only shown on home/landing screen */}
+          {!currentBrandSlug && (
+            <button
+              onClick={onOpenSupabaseModal}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
+                isSupabaseConfigured
+                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 border border-emerald-500/30'
+                  : 'bg-[#E6A71B]/10 hover:bg-[#E6A71B]/20 text-[#B8810E] border border-[#E6A71B]/30'
+              }`}
+            >
+              <Database className="w-3 h-3 text-[#E6A71B]" />
+              <span>{isSupabaseConfigured ? 'Supabase Synchronized' : 'Sandbox Fallback'}</span>
+            </button>
+          )}
+
           {currentBrandSlug ? (
             <button
               id="back-to-search-btn"
@@ -44,8 +61,8 @@ export function Navbar({ currentBrandSlug, onBackToHome }: NavbarProps) {
           ) : (
             <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-[#E6A71B]/10 border border-[#E6A71B]/20 shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest text-[#B8810E] font-mono font-extrabold">
-                Public Infrastructure Layer
+              <span className="text-[10px] uppercase tracking-widest text-[#B8810E] font-mono font-extrabold font-black">
+                Registry Active
               </span>
             </div>
           )}

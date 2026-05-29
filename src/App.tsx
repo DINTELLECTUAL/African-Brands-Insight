@@ -3,11 +3,15 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { BrandDashboard } from './components/BrandDashboard';
 import { LiveActivityPerception } from './components/LiveActivityPerception';
+import { SupabaseInfoModal } from './components/SupabaseInfoModal';
 
 import { BRANDS_DATA, findOrCreateBrand, calculateDynamicMetrics } from './brandsData';
 import { BrandPerception, PublicFeedback } from './types';
+import { isSupabaseConfigured, getSupabaseBrands, saveSupabaseBrand, syncAllBrandsToSupabase } from './lib/supabase';
 
 export default function App() {
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+
   // Live states for dynamic feedback preservation and active state list (persisted to LocalStorage)
   const [brands, setBrands] = useState<BrandPerception[]>(() => {
     const saved = localStorage.getItem('abi_sovereign_brands_v2');
@@ -75,6 +79,27 @@ export default function App() {
     return BRANDS_DATA;
   });
 
+  // Fetch real-time synchronized data from Supabase on start if configured
+  useEffect(() => {
+    async function loadSupabaseData() {
+      if (isSupabaseConfigured) {
+        try {
+          const dbBrands = await getSupabaseBrands();
+          if (dbBrands && dbBrands.length > 0) {
+            setBrands(dbBrands);
+          } else if (dbBrands) {
+            // First time database is active but empty: seed baseline BRANDS_DATA
+            await syncAllBrandsToSupabase(BRANDS_DATA);
+            setBrands(BRANDS_DATA);
+          }
+        } catch (error) {
+          console.error("Failed to fetch records from Supabase:", error);
+        }
+      }
+    }
+    loadSupabaseData();
+  }, []);
+
   // Keep LocalStorage in sync
   useEffect(() => {
     localStorage.setItem('abi_sovereign_brands_v2', JSON.stringify(brands));
@@ -135,7 +160,13 @@ export default function App() {
       const createdBrand = findOrCreateBrand(query, category);
       
       // Update local state list to guarantee persistence
-      setBrands((prev) => [...prev, createdBrand]);
+      setBrands((prev) => {
+        const updated = [...prev, createdBrand];
+        if (isSupabaseConfigured) {
+          saveSupabaseBrand(createdBrand);
+        }
+        return updated;
+      });
       
       // Redirect immediately
       window.location.hash = `#/brand/${createdBrand.id}`;
@@ -158,8 +189,8 @@ export default function App() {
       ...feedbackInput
     };
 
-    setBrands((currentBrands) =>
-      currentBrands.map((b) => {
+    setBrands((currentBrands) => {
+      const updated = currentBrands.map((b) => {
         if (b.id !== currentBrandSlug) return b;
 
         // Route to proper type registry for back-compat compatibility, and overall calculation
@@ -196,7 +227,7 @@ export default function App() {
           updatedAiSummary += `This profile is dynamically updated with a live consensus score of ${dynamicMetrics.overallScore}%.`;
         }
 
-        return {
+        const updatedBrand = {
           ...b,
           ...dynamicMetrics,
           traits: updatedTraits,
@@ -204,29 +235,44 @@ export default function App() {
           praises: updatedPraises,
           suggestions: updatedSuggestions,
         };
-      })
-    );
+
+        if (isSupabaseConfigured) {
+          saveSupabaseBrand(updatedBrand);
+        }
+
+        return updatedBrand;
+      });
+      return updated;
+    });
   };
 
   // Upvoting/endorsing insights
   const handleVoteFeedback = (feedbackId: string, listType: 'praise' | 'suggestion') => {
-    setBrands((currentBrands) =>
-      currentBrands.map((b) => {
+    setBrands((currentBrands) => {
+      const updated = currentBrands.map((b) => {
         if (b.id !== currentBrandSlug) return b;
 
+        let updatedBrand = { ...b };
         if (listType === 'praise') {
-          return {
+          updatedBrand = {
             ...b,
             praises: b.praises.map(p => p.id === feedbackId ? { ...p, votes: p.votes + 1 } : p)
           };
         } else {
-          return {
+          updatedBrand = {
             ...b,
             suggestions: b.suggestions.map(s => s.id === feedbackId ? { ...s, votes: s.votes + 1 } : s)
           };
         }
-      })
-    );
+
+        if (isSupabaseConfigured) {
+          saveSupabaseBrand(updatedBrand);
+        }
+
+        return updatedBrand;
+      });
+      return updated;
+    });
   };
 
   return (
@@ -235,6 +281,7 @@ export default function App() {
       <Navbar 
         currentBrandSlug={currentBrandSlug} 
         onBackToHome={handleBackToHome} 
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
       />
 
       {/* Primary view content area dynamically rendered based on routing */}
@@ -266,6 +313,12 @@ export default function App() {
 
       {/* Subtle Liveliness Tracker / Platform Pulse Indicator */}
       <LiveActivityPerception />
+
+      {/* Supabase connection guide & setup instructions */}
+      <SupabaseInfoModal 
+        isOpen={isSupabaseModalOpen} 
+        onClose={() => setIsSupabaseModalOpen(false)} 
+      />
     </div>
   );
 }
