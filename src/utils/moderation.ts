@@ -114,10 +114,13 @@ export function applyConstructiveSuggestion(text: string, originalWord: string, 
  * Generates a mock but consistent device/session fingerprint hash for logging/audit tracking
  */
 export function generateSessionDeviceHash(): string {
-  const userAgent = navigator.userAgent || 'unknown-agent';
-  const width = window.screen.width || 0;
-  const height = window.screen.height || 0;
-  const languages = (navigator.languages || []).join(',');
+  if (typeof window === 'undefined') return 'ssr-server-agent';
+  const nav = typeof navigator !== 'undefined' ? navigator : {} as any;
+  const userAgent = nav.userAgent || 'unknown-agent';
+  const scr = typeof window !== 'undefined' && window.screen ? window.screen : {} as any;
+  const width = scr.width || 0;
+  const height = scr.height || 0;
+  const languages = (nav.languages || []).join(',');
   const components = `${userAgent}|${width}x${height}|${languages}`;
   
   let hash = 0;

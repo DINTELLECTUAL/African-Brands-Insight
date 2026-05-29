@@ -13,10 +13,14 @@ export default function App() {
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
   // Live states for dynamic feedback preservation and active state list (persisted to LocalStorage)
-  const [brands, setBrands] = useState<BrandPerception[]>(() => {
-    const saved = localStorage.getItem('abi_sovereign_brands_v2');
-    if (saved) {
-      try {
+  const [brands, setBrands] = useState<BrandPerception[]>(BRANDS_DATA);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate from localStorage once safely after mount to prevent SSR crashes or race conditions
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('abi_sovereign_brands_v2');
+      if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           // Ensure new baseline brands are merged. Preserve existing submissions.
@@ -26,14 +30,14 @@ export default function App() {
               merged.push(baseline);
             }
           });
-          return merged;
+          setBrands(merged);
         }
-      } catch (e) {
-        console.error("Local registry read failure, fallback to BRANDS_DATA", e);
       }
+    } catch (e) {
+      console.error("Local registry read failure, fallback to BRANDS_DATA", e);
     }
-    return BRANDS_DATA;
-  });
+    setIsHydrated(true);
+  }, []);
 
   // Fetch real-time synchronized data from Supabase on start if configured
   useEffect(() => {
@@ -54,32 +58,34 @@ export default function App() {
       }
     }
     loadSupabaseData();
-  }, []);
+  }, [isHydrated]); // Load after hydration
 
-  // Keep LocalStorage in sync
+  // Keep LocalStorage in sync (only after safe hydration occurs to prevent accidental clean wipes)
   useEffect(() => {
-    localStorage.setItem('abi_sovereign_brands_v2', JSON.stringify(brands));
-  }, [brands]);
+    if (isHydrated) {
+      localStorage.setItem('abi_sovereign_brands_v2', JSON.stringify(brands));
+    }
+  }, [brands, isHydrated]);
 
   // Read routing based on secure URL hashes to allow sharing & refreshes
-  const [currentBrandSlug, setCurrentBrandSlug] = useState<string>(() => {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#/brand/')) {
-      return hash.replace('#/brand/', '');
-    }
-    return '';
-  });
+  const [currentBrandSlug, setCurrentBrandSlug] = useState<string>('');
 
   // Listen to hash change events from browser routing actions
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash && hash.startsWith('#/brand/')) {
-        setCurrentBrandSlug(hash.replace('#/brand/', ''));
-      } else {
-        setCurrentBrandSlug('');
+      if (typeof window !== 'undefined') {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#/brand/')) {
+          setCurrentBrandSlug(hash.replace('#/brand/', ''));
+        } else {
+          setCurrentBrandSlug('');
+        }
       }
     };
+    
+    // Sync initial state on client mount
+    handleHashChange();
+
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);

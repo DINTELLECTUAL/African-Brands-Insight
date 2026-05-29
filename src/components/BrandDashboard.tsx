@@ -49,6 +49,7 @@ export function BrandDashboard({ brand, allBrands = [], onAddFeedback, onVoteFee
 
   // Like / endorsement security registry State (persisted & mapped with device session fingerprint)
   const [likedFeedIds, setLikedFeedIds] = useState<string[]>(() => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return [];
     try {
       const saved = localStorage.getItem('abi_endorsed_feed_ids');
       return saved ? JSON.parse(saved) : [];

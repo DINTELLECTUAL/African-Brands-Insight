@@ -121,11 +121,13 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
 
   // Live matching logic for incompletely or completely typed queries
   const trimmedQuery = searchValue.toLowerCase().trim();
-  const matchedBrands = trimmedQuery && existingBrands
-    ? existingBrands.filter(b => 
-        b.name.toLowerCase().includes(trimmedQuery) || 
-        b.sector.toLowerCase().includes(trimmedQuery)
-      ).slice(0, 4)
+  const matchedBrands = existingBrands
+    ? (trimmedQuery
+        ? existingBrands.filter(b => 
+            b.name.toLowerCase().includes(trimmedQuery) || 
+            b.sector.toLowerCase().includes(trimmedQuery)
+          ).slice(0, 5)
+        : existingBrands.slice(0, 4))
     : [];
 
   return (
@@ -403,7 +405,7 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#082D20]/10">
                   <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-widest flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-                    REGISTERED PROFILES MATCHING ({matchedBrands.length})
+                    {searchValue ? `REGISTERED PROFILES MATCHING (${matchedBrands.length})` : 'HIGH-INTEREST REGISTERED DIRECTORIES'}
                   </span>
                   <span className="text-[9px] font-mono font-bold text-[#082D20]/45">
                     Tap to view or contribute insights
