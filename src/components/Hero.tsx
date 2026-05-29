@@ -76,11 +76,25 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-          className="w-full max-w-2xl mt-10 mb-4"
+          className="w-full max-w-2xl mt-10 mb-4 relative group"
         >
+          {/* Live Ecosystem Sovereign Aura - very subtle slow breathing blur */}
+          <motion.div
+            className="absolute -inset-2 bg-gradient-to-r from-[#E6A71B]/15 via-[#0D4130]/10 to-[#E6A71B]/15 rounded-3xl blur-xl pointer-events-none -z-10"
+            animate={{
+              opacity: [0.4, 0.85, 0.4],
+              scale: [0.97, 1.03, 0.97],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+
           <form
             onSubmit={handleSubmit}
-            className="p-3 bg-white rounded-2xl border-2 border-[#0D4130]/15 hover:border-[#E6A71B]/50 shadow-[0_12px_44px_rgba(8,45,32,0.06)] focus-within:ring-2 focus-within:ring-[#E6A71B]/20 focus-within:border-[#E6A71B] transition-all duration-300"
+            className="p-3 bg-white rounded-2xl border-2 border-[#0D4130]/15 hover:border-[#E6A71B]/55 shadow-[0_12px_44px_rgba(8,45,32,0.06)] focus-within:ring-2 focus-within:ring-[#E6A71B]/35 focus-within:border-[#E6A71B] transition-all duration-500 relative z-10"
           >
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
               {/* Primary Search Input field */}
@@ -117,10 +131,20 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
               {/* Large premium CTA button */}
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-[#082D20] to-[#0D4130] hover:from-[#0D4130] hover:to-[#082D20] text-[#FAF8F2] font-extrabold text-xs rounded-xl tracking-tight transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 select-none font-sans border border-[#E6A71B]/30 hover:border-[#E6A71B]"
+                className="px-6 py-3 bg-gradient-to-r from-[#082D20] to-[#0D4130] hover:from-[#0D4130] hover:to-[#082D20] text-[#FAF8F2] font-extrabold text-xs rounded-xl tracking-tight transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 select-none font-sans border border-[#E6A71B]/30 hover:border-[#E6A71B] relative overflow-hidden group/btn"
               >
-                <span>Submit Insight</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#E6A71B]" />
+                <span className="relative z-10">Submit Insight</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#E6A71B] relative z-10 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+                <motion.div 
+                  className="absolute inset-0 bg-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity"
+                  animate={{
+                    opacity: [0, 0.15, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                />
               </button>
             </div>
           </form>
