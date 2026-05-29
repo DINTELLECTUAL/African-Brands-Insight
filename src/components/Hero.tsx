@@ -31,10 +31,10 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
   };
 
   return (
-    <section id="hero" className="w-full relative min-h-screen flex flex-col justify-center pt-32 pb-24 bg-[#F8F6F1] overflow-hidden">
+    <section id="hero" className="w-full relative min-h-screen flex flex-col justify-center pt-32 pb-24 bg-[#FAF8F2] overflow-hidden">
       {/* Visual Alignment Lines - Extremely quiet, sovereign-scale background */}
-      <div className="absolute inset-x-0 top-0 h-[650px] pointer-events-none opacity-20">
-        <div className="w-full h-full bg-[radial-gradient(#0F3D2E_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_70%,transparent_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-[650px] pointer-events-none opacity-25">
+        <div className="w-full h-full bg-[radial-gradient(#082D20_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_70%,transparent_100%)]" />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 md:px-12 w-full relative z-10 text-center flex flex-col items-center">
@@ -43,10 +43,10 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0F3D2E]/5 border border-[#0F3D2E]/10 mb-8"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6A71B]/12 border border-[#E6A71B]/40 mb-8 shadow-xs"
         >
-          <div className="w-1.5 h-1.5 rounded-full bg-[#C49A45] animate-pulse" />
-          <span className="text-[10px] font-mono tracking-widest text-[#0F3D2E]/70 uppercase font-bold">
+          <div className="w-2 h-2 rounded-full bg-[#E6A71B] shadow-[0_0_10px_rgba(230,167,27,0.9)] animate-pulse" />
+          <span className="text-[10px] font-mono tracking-widest text-[#082D20] uppercase font-black">
             Africa's Sovereign Public Insight Infrastructure
           </span>
         </motion.div>
@@ -56,9 +56,9 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="text-3xl sm:text-4xl md:text-[52px] font-semibold text-[#0F3D2E] tracking-tight leading-[1.1] max-w-3xl font-display"
+          className="text-3xl sm:text-4xl md:text-[52px] font-extrabold text-[#082D20] tracking-tight leading-[1.1] max-w-3xl font-display"
         >
-          Africa’s Public Insight Layer
+          Africa’s <span className="text-[#E6A71B] drop-shadow-[0_2px_12px_rgba(230,167,27,0.15)]">Public Insight</span> Layer
         </motion.h1>
 
         {/* Hero Subtitle */}
@@ -66,7 +66,7 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
-          className="text-[#0F3D2E]/70 text-base sm:text-lg font-normal max-w-2xl mt-4 leading-relaxed font-sans"
+          className="text-[#082D20]/80 text-base sm:text-lg font-medium max-w-2xl mt-4 leading-relaxed font-sans"
         >
           Submit meaningful insights, commendations, and improvement suggestions for African brands, creators, businesses, and public figures.
         </motion.p>
@@ -80,7 +80,7 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
         >
           <form
             onSubmit={handleSubmit}
-            className="p-2.5 bg-[#FCFAF5] rounded-2xl border border-[#0F3D2E]/15 hover:border-[#0F3D2E]/30 shadow-[0_8px_30px_rgba(15,61,46,0.04)] focus-within:ring-1 focus-within:ring-[#0F3D2E]/10 focus-within:border-[#0F3D2E] transition-all duration-300"
+            className="p-3 bg-white rounded-2xl border-2 border-[#0D4130]/15 hover:border-[#E6A71B]/50 shadow-[0_12px_44px_rgba(8,45,32,0.06)] focus-within:ring-2 focus-within:ring-[#E6A71B]/20 focus-within:border-[#E6A71B] transition-all duration-300"
           >
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
               {/* Primary Search Input field */}
@@ -89,25 +89,25 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
                   type="text"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Enter a brand, business, creator, or public figure"
-                  className="w-full bg-transparent px-3 py-3 text-[#0F3D2E] text-sm md:text-base font-medium placeholder:text-[#0F3D2E]/35 focus:outline-none"
+                  placeholder="Enter a brand, business, creator or Celebrity..."
+                  className="w-full bg-transparent px-2.5 py-3 text-[#082D20] text-xs sm:text-sm md:text-base font-bold placeholder:text-[11px] sm:placeholder:text-sm md:placeholder:text-base placeholder:text-[#082D20]/40 placeholder:font-semibold focus:outline-none"
                   aria-label="Brand or person query"
                 />
               </div>
 
               {/* Category Dropdown */}
-              <div className="flex items-center border-[#0F3D2E]/10 border-t sm:border-t-0 sm:border-l px-3 py-1 sm:py-0">
-                <span className="text-[10px] font-mono uppercase text-[#0F3D2E]/40 mr-1.5 font-bold">
+              <div className="flex items-center border-[#082D20]/10 border-t sm:border-t-0 sm:border-l px-3 py-1 sm:py-0">
+                <span className="text-[10px] font-mono uppercase text-[#082D20]/50 mr-1.5 font-black">
                   As:
                 </span>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="bg-transparent text-[#0F3D2E] text-xs font-semibold select-none focus:outline-none cursor-pointer pr-3 py-1.5"
+                  className="bg-transparent text-[#082D20] text-xs font-bold select-none focus:outline-none cursor-pointer pr-3 py-1.5"
                   aria-label="Entity type"
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#FCFAF5] text-[#0F3D2E] font-sans font-medium text-xs">
+                    <option key={cat} value={cat} className="bg-white text-[#082D20] font-sans font-bold text-xs">
                       {cat}
                     </option>
                   ))}
@@ -117,10 +117,10 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
               {/* Large premium CTA button */}
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#0F3D2E] hover:bg-[#164C3B] text-[#F8F6F1] font-medium text-xs rounded-xl tracking-tight transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 select-none font-sans"
+                className="px-6 py-3 bg-gradient-to-r from-[#082D20] to-[#0D4130] hover:from-[#0D4130] hover:to-[#082D20] text-[#FAF8F2] font-extrabold text-xs rounded-xl tracking-tight transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 select-none font-sans border border-[#E6A71B]/30 hover:border-[#E6A71B]"
               >
                 <span>Submit Insight</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#C49A45]" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#E6A71B]" />
               </button>
             </div>
           </form>
@@ -136,7 +136,7 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="w-full max-w-4xl mt-16 text-left border-t border-[#0F3D2E]/10 pt-12 self-center"
+          className="w-full max-w-4xl mt-16 text-left border-t-2 border-[#082D20]/10 pt-12 self-center"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
@@ -155,12 +155,12 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
             ].map((col, index) => (
               <div key={index} className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-[#C49A45]">0{index + 1} //</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#0F3D2E]">
+                  <span className="text-xs font-mono font-black text-[#E6A71B]">0{index + 1} //</span>
+                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#082D20] font-display">
                     {col.title}
                   </h3>
                 </div>
-                <p className="text-[#0F3D2E]/70 text-xs leading-relaxed font-sans font-light">
+                <p className="text-[#082D20]/80 text-xs leading-relaxed font-sans font-medium">
                   {col.desc}
                 </p>
               </div>
@@ -173,35 +173,35 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.4 }}
-          className="w-full max-w-4xl mt-16 bg-[#0F3D2E] text-[#F8F6F1] p-6 sm:p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+          className="w-full max-w-4xl mt-16 bg-gradient-to-br from-[#082D20] to-[#041A13] text-[#FAF8F2] p-6 sm:p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden border-2 border-[#E6A71B]/30 shadow-xl shadow-[#082D20]/15"
         >
-          <div className="absolute inset-x-0 bottom-0 top-0 pointer-events-none opacity-25">
-            <div className="w-full h-full bg-[radial-gradient(#F8F6F1_0.8px,transparent_0.8px)] [background-size:20px_20px]" />
+          <div className="absolute inset-x-0 bottom-0 top-0 pointer-events-none opacity-20">
+            <div className="w-full h-full bg-[radial-gradient(#FAF8F2_0.8px,transparent_0.8px)] [background-size:20px_20px]" />
           </div>
 
           <div className="flex items-center gap-4 relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-[#F8F6F1]/10 flex items-center justify-center border border-[#F8F6F1]/10">
-              <ShieldCheck className="w-5 h-5 text-[#C49A45]" />
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-[#FAF8F2]/10 shrink-0">
+              <ShieldCheck className="w-5 h-5 text-[#E6A71B]" />
             </div>
             <div className="text-left">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-[#F8F6F1]">
+              <h4 className="text-xs font-black uppercase tracking-widest text-[#FAF8F2] font-display">
                 Unbiased Verification Protocol
               </h4>
-              <p className="text-[#F8F6F1]/65 text-[10px] font-mono leading-relaxed mt-0.5">
+              <p className="text-[#FAF8F2]/75 text-[10px] font-mono leading-relaxed mt-0.5">
                 Every feedback point undergoes algorithmic integrity classification to filter toxic or malicious submissions.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-10 relative z-10 w-full md:w-auto border-t md:border-t-0 border-[#F8F6F1]/10 pt-4 md:pt-0 justify-around sm:justify-start">
+          <div className="flex items-center gap-10 relative z-10 w-full md:w-auto border-t md:border-t-0 border-white/10 pt-4 md:pt-0 justify-around sm:justify-start">
             <div>
-              <span className="text-lg font-bold block font-mono">100% SECURE</span>
-              <span className="text-[9px] uppercase tracking-wider text-[#F8F6F1]/50 font-mono block">Zero Tracking</span>
+              <span className="text-lg font-black block font-mono text-[#E6A71B]">100% SECURE</span>
+              <span className="text-[9px] uppercase tracking-wider text-[#FAF8F2]/60 font-mono block">Zero Tracking</span>
             </div>
-            <div className="h-6 w-px bg-[#F8F6F1]/20 hidden sm:block" />
+            <div className="h-6 w-px bg-white/20 hidden sm:block" />
             <div>
-              <span className="text-lg font-bold block font-mono">PAN-AFRICAN</span>
-              <span className="text-[9px] uppercase tracking-wider text-[#F8F6F1]/50 font-mono block">Sovereign Focus</span>
+              <span className="text-lg font-black block font-mono text-[#E6A71B]">PAN-AFRICAN</span>
+              <span className="text-[9px] uppercase tracking-wider text-[#FAF8F2]/60 font-mono block">Sovereign Focus</span>
             </div>
           </div>
         </motion.div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { BrandDashboard } from './components/BrandDashboard';
+import { LiveActivityPerception } from './components/LiveActivityPerception';
 
 import { BRANDS_DATA, findOrCreateBrand } from './brandsData';
 import { BrandPerception, PublicFeedback } from './types';
@@ -153,7 +154,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6F1] text-[#0F3D2E] font-sans selection:bg-[#0F3D2E]/10 select-none relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF8F2] text-[#082D20] font-sans selection:bg-[#E6A71B]/20 selection:text-[#082D20] select-none relative overflow-x-hidden">
       {/* Premium minimal header navbar */}
       <Navbar 
         currentBrandSlug={currentBrandSlug} 
@@ -176,15 +177,18 @@ export default function App() {
       )}
 
       {/* Sovereign signpost metadata watermark - extremely minimal bottom row */}
-      <div className="w-full bg-[#FCFAF5] border-t border-[#0F3D2E]/5 py-6">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-[#0F3D2E]/40 font-mono">
-          <span>African Brands Insight Registry • sovereign sandbox access</span>
+      <div className="w-full bg-[#FAF8F2] border-t-2 border-[#E6A71B]/15 py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-[#082D20]/50 font-mono">
+          <span className="font-bold tracking-tight">African Brands Insight Registry • sovereign sandbox access</span>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            <span>Integrity nodes online</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+            <span className="font-bold">INTEGRITY NODES ACTIVE</span>
           </div>
         </div>
       </div>
+
+      {/* Subtle Liveliness Tracker / Platform Pulse Indicator */}
+      <LiveActivityPerception />
     </div>
   );
 }

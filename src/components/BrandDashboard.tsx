@@ -110,12 +110,25 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
     
     // Slight simulated high-performance backend synchronization
     setTimeout(() => {
+      const finalUser = userName.trim() || 'Anonymous Contributor';
+      
       onAddFeedback({
-        user: userName.trim() || 'Anonymous Contributor',
+        user: finalUser,
         userTitle: userTitle.trim() || 'Verified Citizen',
         content: content.trim(),
         sentiment: insightType,
       });
+
+      // Dispatch real-time custom event
+      window.dispatchEvent(
+        new CustomEvent('new-insight-submitted', {
+          detail: {
+            brandName: brand.name,
+            sentiment: insightType,
+            user: finalUser,
+          },
+        })
+      );
 
       setContent('');
       setUserName('');
@@ -153,47 +166,49 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
   };
 
   const scoreColorClass = (score: number) => {
-    if (score >= 82) return 'text-[#C49A45]';
-    return 'text-[#164C3B]';
+    if (score >= 82) return 'text-[#E6A71B] drop-shadow-[0_2px_4px_rgba(230,167,27,0.3)]';
+    return 'text-[#0D4130]';
   };
 
   return (
     <div id="dashboard" className="w-full space-y-10">
       {/* 1. PREMIUM HEADER SECTION */}
-      <div className="bg-[#FAF7F2] border border-[#0F3D2E]/10 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-5">
+      <div className="bg-[#FAF7F2] border-2 border-[#0B3D2F]/20 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-[0_4px_20px_rgba(11,61,47,0.06)]">
+        <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-br from-[#E6A71B]/5 to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="flex items-center gap-5 relative z-10">
           {/* Avatar Placeholder using Initials */}
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0F3D2E] flex items-center justify-center text-[#F8F6F1] text-xl font-bold border border-[#0F3D2E]/20 select-none shadow-sm shadow-[#0F3D2E]/10">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#082D20] to-[#0D4130] flex items-center justify-center text-[#E6A71B] text-2xl font-black border-2 border-[#E6A71B] select-none shadow-[0_4px_12px_rgba(8,45,32,0.25)]">
             {brand.logoChar}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded bg-[#0F3D2E]/5 border border-[#0F3D2E]/10 text-[10px] font-mono uppercase font-bold text-[#0F3D2E]/70">
+              <span className="px-2 py-0.5 rounded bg-[#E6A71B]/15 border border-[#E6A71B]/30 text-[10px] font-mono uppercase font-black text-[#B8810E] tracking-wider">
                 {brand.sector || 'Brand'}
               </span>
-              <span className="text-[#0F3D2E]/20">•</span>
-              <span className="text-[10px] font-mono text-[#0F3D2E]/50 uppercase font-medium">
+              <span className="text-[#082D20]/20">•</span>
+              <span className="text-[10px] font-mono text-[#082D20]/60 uppercase font-bold tracking-wider flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
                 Registry Active
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#0F3D2E] font-display">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#082D20] font-display">
               {brand.name}
             </h2>
           </div>
         </div>
 
         {/* Live Aggregated Statistics Gages */}
-        <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-nowrap sm:gap-6">
-          <div className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-white/70 border border-[#0F3D2E]/5">
-            <span className="text-[9px] sm:text-[10px] font-mono text-[#0F3D2E]/40 uppercase block tracking-tight">Insight Submissions</span>
-            <span className="text-xl sm:text-2xl font-bold font-mono text-[#000000] block mt-0.5">
+        <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-nowrap sm:gap-6 relative z-10">
+          <div className="px-5 py-3 rounded-xl bg-white border-2 border-[#082D20]/10 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#E6A71B]/40 transition-all duration-300">
+            <span className="text-[9px] sm:text-[10px] font-mono text-[#082D20]/50 uppercase block tracking-wider font-bold">Insight Submissions</span>
+            <span className="text-2xl sm:text-3xl font-black font-mono text-[#082D20] block mt-0.5">
               {allInsights.length}
             </span>
           </div>
 
-          <div className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-white/70 border border-[#0F3D2E]/5">
-            <span className="text-[9px] sm:text-[10px] font-mono text-[#0F3D2E]/40 uppercase block tracking-tight">Consensus Score</span>
-            <span className={`text-xl sm:text-2xl font-bold font-mono block mt-0.5 ${scoreColorClass(brand.overallScore)}`}>
+          <div className="px-5 py-3 rounded-xl bg-white border-2 border-[#E6A71B]/20 shadow-[0_4px_12px_rgba(230,167,27,0.06)] hover:border-[#E6A71B]/50 transition-all duration-300">
+            <span className="text-[9px] sm:text-[10px] font-mono text-[#B8810E] uppercase block tracking-wider font-bold">Consensus Score</span>
+            <span className={`text-2xl sm:text-3xl font-black font-mono block mt-0.5 ${scoreColorClass(brand.overallScore)}`}>
               {brand.overallScore}%
             </span>
           </div>
@@ -358,8 +373,8 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
                 disabled={submitting || isHardBlocked}
                 className={`w-full py-3.5 text-xs rounded-xl font-bold transition-all select-none shadow-xs cursor-pointer flex items-center justify-center gap-2 ${
                   isHardBlocked 
-                    ? 'bg-[#0F3D2E]/20 text-[#0F3D2E]/40 cursor-not-allowed border border-[#0F3D2E]/5 shadow-none' 
-                    : 'bg-[#0F3D2E] hover:bg-[#164C3B] text-[#F8F6F1] hover:shadow-md'
+                    ? 'bg-[#082D20]/20 text-[#082D20]/40 cursor-not-allowed border border-[#082D20]/5 shadow-none' 
+                    : 'bg-gradient-to-r from-[#082D20] to-[#0D4130] hover:from-[#0D4130] hover:to-[#082D20] text-[#FAF8F2] border-2 border-[#E6A71B]/30 hover:border-[#E6A71B] hover:shadow-lg hover:shadow-[#082D20]/20'
                 }`}
               >
                 {submitting ? (
@@ -367,7 +382,7 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
                 ) : (
                   <>
                     <span>Publish Insight</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-[#C49A45]" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-[#E6A71B]" />
                   </>
                 )}
               </button>

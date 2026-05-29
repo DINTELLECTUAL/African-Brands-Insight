@@ -7,12 +7,12 @@
   --font-display: "Geist", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   
-  --color-forest: #0F3D2E;
-  --color-forest-light: #164C3B;
-  --color-ivory: #F8F6F1;
-  --color-ivory-dark: #EEECE5;
-  --color-gold: #C49A45;
-  --color-gold-dark: #A37A2F;
+  --color-forest: #082D20;
+  --color-forest-light: #0D4130;
+  --color-ivory: #FAF8F2;
+  --color-ivory-dark: #EDE9DE;
+  --color-gold: #E6A71B;
+  --color-gold-dark: #B8810E;
 }
 
 @layer base {
