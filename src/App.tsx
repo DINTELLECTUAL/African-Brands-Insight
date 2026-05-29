@@ -172,7 +172,7 @@ export default function App() {
         </main>
       ) : (
         <main>
-          <Hero onSearchAndRedirect={handleSearchAndRedirect} />
+          <Hero onSearchAndRedirect={handleSearchAndRedirect} existingBrands={brands} />
         </main>
       )}
 

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { Sparkles, ShieldCheck, ArrowUpRight, HelpCircle, Terminal } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Sparkles, ShieldCheck, ArrowUpRight, HelpCircle, Terminal, Search, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { BrandPerception } from '../types';
 
 interface HeroProps {
   onSearchAndRedirect: (query: string, category: string) => void;
+  existingBrands?: BrandPerception[];
 }
 
-export function Hero({ onSearchAndRedirect }: HeroProps) {
+export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
   const [searchValue, setSearchValue] = useState('');
   const [category, setCategory] = useState('Brand');
   const [errorText, setErrorText] = useState('');
+  const [inputHasFocus, setInputHasFocus] = useState(false);
 
   const categories = [
     'Brand',
@@ -29,6 +32,15 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
     setErrorText('');
     onSearchAndRedirect(searchValue, category);
   };
+
+  // Live matching logic for incompletely or completely typed queries
+  const trimmedQuery = searchValue.toLowerCase().trim();
+  const matchedBrands = trimmedQuery && existingBrands
+    ? existingBrands.filter(b => 
+        b.name.toLowerCase().includes(trimmedQuery) || 
+        b.sector.toLowerCase().includes(trimmedQuery)
+      ).slice(0, 4)
+    : [];
 
   return (
     <section id="hero" className="w-full relative min-h-screen flex flex-col justify-center pt-32 pb-24 bg-[#FAF8F2] overflow-hidden">
@@ -76,7 +88,7 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-          className="w-full max-w-2xl mt-10 mb-4 relative group"
+          className="w-full max-w-2xl mt-10 mb-4 relative z-40"
         >
           {/* Live Ecosystem Sovereign Aura - very subtle slow breathing blur */}
           <motion.div
@@ -102,6 +114,8 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
                 <input
                   type="text"
                   value={searchValue}
+                  onFocus={() => setInputHasFocus(true)}
+                  onBlur={() => setTimeout(() => setInputHasFocus(false), 200)} // slight delay to allow tap/clicks on matched brands
                   onChange={(e) => setSearchValue(e.target.value)}
                   placeholder="Enter a brand, business, creator or Celebrity..."
                   className="w-full bg-transparent px-2.5 py-3 text-[#082D20] text-xs sm:text-sm md:text-base font-bold placeholder:text-[11px] sm:placeholder:text-sm md:placeholder:text-base placeholder:text-[#082D20]/40 placeholder:font-semibold focus:outline-none"
@@ -148,6 +162,72 @@ export function Hero({ onSearchAndRedirect }: HeroProps) {
               </button>
             </div>
           </form>
+
+          {/* Prompted Existing Match Matches list container */}
+          <AnimatePresence>
+            {inputHasFocus && matchedBrands.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.99 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute left-0 right-0 mt-3 bg-[#FAF8F2]/95 backdrop-blur-md rounded-2xl border-2 border-[#E6A71B]/30 shadow-[0_16px_50px_rgba(8,45,32,0.16)] p-4 max-h-[350px] overflow-y-auto text-left z-50 overflow-hidden"
+              >
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#082D20]/10">
+                  <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+                    REGISTERED PROFILES MATCHING ({matchedBrands.length})
+                  </span>
+                  <span className="text-[9px] font-mono font-bold text-[#082D20]/45">
+                    Tap to view or contribute insights
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  {matchedBrands.map((brand) => (
+                    <button
+                      key={brand.id}
+                      type="button"
+                      onClick={() => {
+                        onSearchAndRedirect(brand.name, brand.sector);
+                        setSearchValue('');
+                      }}
+                      className="w-full text-left p-2.5 rounded-xl hover:bg-[#E6A71B]/12 border border-transparent hover:border-[#E6A71B]/30 flex items-center justify-between gap-3 transition-all duration-200 cursor-pointer group/item bg-white/55"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#082D20] to-[#0D4130] text-[#E6A71B] border-2 border-[#E6A71B]/20 flex items-center justify-center font-black text-xs shrink-0 select-none group-hover/item:border-[#E6A71B] transition-colors shadow-2xs">
+                          {brand.logoChar}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-bold text-[#082D20] truncate group-hover/item:text-[#E6A71B] transition-colors">
+                            {brand.name}
+                          </p>
+                          <p className="text-[10px] font-mono font-bold text-[#082D20]/50 uppercase tracking-tight truncate">
+                            {brand.sector} • {brand.country}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] sm:text-xs font-mono font-black text-[#E6A71B] bg-[#082D20] px-2 py-0.5 rounded-lg border border-[#E6A71B]/30 select-none shadow-3xs">
+                          {brand.overallScore}%
+                        </span>
+                        <span className="text-[10px] font-mono font-extrabold text-[#082D20]/45 group-hover/item:text-[#082D20] group-hover/item:translate-x-0.5 transition-all">
+                          Select →
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-[#082D20]/5 flex items-center gap-2 text-[9px] font-mono text-[#082D20]/60">
+                  <span className="font-extrabold uppercase text-[#B8810E]">Tip:</span>
+                  <span>Can't see yours? Continue typing to dynamically register a sovereign new registry!</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {errorText && (
             <p className="text-red-700 text-xs font-mono mt-2.5 text-left ml-4 font-bold">
               ● {errorText}
