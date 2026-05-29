@@ -1,0 +1,6 @@
+{
+  "name": "African Brands Insight",
+  "description": "A premium public insight, feedback, and sentiment tracking ecosystem for African brands, startups, creators, and public institutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

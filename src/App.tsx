@@ -1,0 +1,190 @@
+import { useState, useEffect } from 'react';
+import { Navbar } from './components/Navbar';
+import { Hero } from './components/Hero';
+import { BrandDashboard } from './components/BrandDashboard';
+
+import { BRANDS_DATA, findOrCreateBrand } from './brandsData';
+import { BrandPerception, PublicFeedback } from './types';
+
+export default function App() {
+  // Live states for dynamic feedback preservation and active state list (persisted to LocalStorage)
+  const [brands, setBrands] = useState<BrandPerception[]>(() => {
+    const saved = localStorage.getItem('abi_sovereign_brands_v2');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Local registry read failure, fallback to BRANDS_DATA", e);
+      }
+    }
+    return BRANDS_DATA;
+  });
+
+  // Keep LocalStorage in sync
+  useEffect(() => {
+    localStorage.setItem('abi_sovereign_brands_v2', JSON.stringify(brands));
+  }, [brands]);
+
+  // Read routing based on secure URL hashes to allow sharing & refreshes
+  const [currentBrandSlug, setCurrentBrandSlug] = useState<string>(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#/brand/')) {
+      return hash.replace('#/brand/', '');
+    }
+    return '';
+  });
+
+  // Listen to hash change events from browser routing actions
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#/brand/')) {
+        setCurrentBrandSlug(hash.replace('#/brand/', ''));
+      } else {
+        setCurrentBrandSlug('');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Back to landing search page
+  const handleBackToHome = () => {
+    window.location.hash = '';
+    setCurrentBrandSlug('');
+  };
+
+  // Find corresponding brand data by matching active slug
+  const activeBrand = brands.find(b => b.id === currentBrandSlug);
+
+  // Search/Create action flow
+  const handleSearchAndRedirect = (query: string, category: string) => {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) return;
+
+    // Create unique slug
+    const targetSlug = normalizedQuery
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+    if (!targetSlug) return;
+
+    // Search state list for match
+    const foundIdx = brands.findIndex(b => b.id === targetSlug || b.name.toLowerCase() === normalizedQuery);
+
+    if (foundIdx !== -1) {
+      // Redirect to existing page
+      window.location.hash = `#/brand/${brands[foundIdx].id}`;
+    } else {
+      // Automatically generate a clean professional profile page
+      const createdBrand = findOrCreateBrand(query, category);
+      
+      // Update local state list to guarantee persistence
+      setBrands((prev) => [...prev, createdBrand]);
+      
+      // Redirect immediately
+      window.location.hash = `#/brand/${createdBrand.id}`;
+    }
+  };
+
+  // Handle addition of verified user insights
+  const handleAddFeedback = (feedbackInput: Omit<PublicFeedback, 'id' | 'date' | 'votes'>) => {
+    const feedbackType = feedbackInput.sentiment;
+    const todayStr = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    const populatedFeedback: PublicFeedback = {
+      id: `live-feed-${Math.random()}`,
+      votes: 1, // Undergoes standard initial peer endorsement count
+      date: todayStr,
+      ...feedbackInput
+    };
+
+    setBrands((currentBrands) =>
+      currentBrands.map((b) => {
+        if (b.id !== currentBrandSlug) return b;
+
+        // Route to proper type registry for back-compat compatibility, and overall calculation
+        const updatedPraises = feedbackType === 'positive' 
+          ? [populatedFeedback, ...b.praises] 
+          : b.praises;
+
+        const updatedSuggestions = feedbackType !== 'positive' 
+          ? [populatedFeedback, ...b.suggestions] 
+          : b.suggestions;
+
+        // Perform dynamic micro adjusts to continuous consensus scores
+        const oldScore = b.overallScore;
+        const scoreDelta = feedbackType === 'positive' ? 1.5 : -1.0;
+        const newScore = Math.min(100, Math.max(50, parseFloat((oldScore + scoreDelta).toFixed(1))));
+
+        return {
+          ...b,
+          overallScore: newScore,
+          praises: updatedPraises,
+          suggestions: updatedSuggestions,
+        };
+      })
+    );
+  };
+
+  // Upvoting/endorsing insights
+  const handleVoteFeedback = (feedbackId: string, listType: 'praise' | 'suggestion') => {
+    setBrands((currentBrands) =>
+      currentBrands.map((b) => {
+        if (b.id !== currentBrandSlug) return b;
+
+        if (listType === 'praise') {
+          return {
+            ...b,
+            praises: b.praises.map(p => p.id === feedbackId ? { ...p, votes: p.votes + 1 } : p)
+          };
+        } else {
+          return {
+            ...b,
+            suggestions: b.suggestions.map(s => s.id === feedbackId ? { ...s, votes: s.votes + 1 } : s)
+          };
+        }
+      })
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8F6F1] text-[#0F3D2E] font-sans selection:bg-[#0F3D2E]/10 select-none relative overflow-x-hidden">
+      {/* Premium minimal header navbar */}
+      <Navbar 
+        currentBrandSlug={currentBrandSlug} 
+        onBackToHome={handleBackToHome} 
+      />
+
+      {/* Primary view content area dynamically rendered based on routing */}
+      {currentBrandSlug && activeBrand ? (
+        <main className="max-w-6xl mx-auto px-6 md:px-12 pt-32 pb-24 z-10 relative">
+          <BrandDashboard 
+            brand={activeBrand}
+            onAddFeedback={handleAddFeedback}
+            onVoteFeedback={handleVoteFeedback}
+          />
+        </main>
+      ) : (
+        <main>
+          <Hero onSearchAndRedirect={handleSearchAndRedirect} />
+        </main>
+      )}
+
+      {/* Sovereign signpost metadata watermark - extremely minimal bottom row */}
+      <div className="w-full bg-[#FCFAF5] border-t border-[#0F3D2E]/5 py-6">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-[#0F3D2E]/40 font-mono">
+          <span>African Brands Insight Registry • sovereign sandbox access</span>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+            <span>Integrity nodes online</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
