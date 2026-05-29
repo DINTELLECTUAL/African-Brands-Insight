@@ -1,4 +1,4 @@
-import { Compass, Database, Link2 } from 'lucide-react';
+import { Compass, Link2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -23,7 +23,7 @@ export function Navbar({ currentBrandSlug, onBackToHome, onOpenSupabaseModal }: 
           onClick={onBackToHome}
           className="flex items-center justify-center gap-3 group text-center sm:text-left cursor-pointer mx-auto sm:mx-0"
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#082D20] to-[#0D4130] flex items-center justify-center text-[#E6A71B] font-black text-sm border-2 border-[#E6A71B] relative overflow-hidden shrink-0 shadow-[0_2px_8px_rgba(8,45,32,0.15)]">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#082D20] to-[#0D4130] flex items-center justify-center text-[#E6A71B] font-black text-sm border-2 border-[#E6A71B] relative overflow-hidden shrink-0 shadow-[0_2px_8px_rgba(8,45,32,0.15)] font-mono">
             <span className="relative z-10">A</span>
             <div className="absolute inset-0 bg-[#E6A71B]/20 translate-y-8 group-hover:translate-y-0 transition-transform duration-300" />
           </div>
@@ -35,21 +35,6 @@ export function Navbar({ currentBrandSlug, onBackToHome, onOpenSupabaseModal }: 
 
         {/* Dynamic Action Area */}
         <div className="flex items-center justify-center sm:justify-end gap-3.5 w-full sm:w-auto">
-          {/* Database Synchronization Status Button - only shown on home/landing screen */}
-          {!currentBrandSlug && (
-            <button
-              onClick={onOpenSupabaseModal}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${
-                isSupabaseConfigured
-                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 border border-emerald-500/30'
-                  : 'bg-[#E6A71B]/10 hover:bg-[#E6A71B]/20 text-[#B8810E] border border-[#E6A71B]/30'
-              }`}
-            >
-              <Database className="w-3 h-3 text-[#E6A71B]" />
-              <span>{isSupabaseConfigured ? 'Supabase Synchronized' : 'Sandbox Fallback'}</span>
-            </button>
-          )}
-
           {currentBrandSlug ? (
             <button
               id="back-to-search-btn"
@@ -59,12 +44,15 @@ export function Navbar({ currentBrandSlug, onBackToHome, onOpenSupabaseModal }: 
               ← Back to Platform Search
             </button>
           ) : (
-            <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-[#E6A71B]/10 border border-[#E6A71B]/20 shadow-xs">
+            <button
+              onClick={onOpenSupabaseModal}
+              className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-[#E6A71B]/10 border border-[#E6A71B]/20 shadow-xs cursor-pointer text-left hover:bg-[#E6A71B]/20 transition-all font-mono"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest text-[#B8810E] font-mono font-extrabold font-black">
+              <span className="text-[10px] uppercase tracking-widest text-[#B8810E] font-extrabold">
                 Registry Active
               </span>
-            </div>
+            </button>
           )}
         </div>
       </div>
