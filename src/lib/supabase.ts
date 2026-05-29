@@ -1,17 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 import { BrandPerception } from '../types';
 
-// Read configuration from Vite or Next.js environment variables helper
+// Read configuration from Vite or Next.js environment variables helper safely
+function getEnv(key: string): string {
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
+    if ((import.meta as any).env[key]) {
+      return (import.meta as any).env[key];
+    }
+  }
+  if (typeof process !== 'undefined' && (process as any).env) {
+    if ((process as any).env[key]) {
+      return (process as any).env[key];
+    }
+  }
+  return '';
+}
+
 const SUPABASE_URL = 
-  (typeof process !== 'undefined' && process.env ? process.env.NEXT_PUBLIC_SUPABASE_URL : '') ||
-  (typeof process !== 'undefined' && process.env ? process.env.VITE_SUPABASE_URL : '') ||
-  (typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env.VITE_SUPABASE_URL : '') ||
+  getEnv('VITE_SUPABASE_URL') || 
+  getEnv('NEXT_PUBLIC_SUPABASE_URL') || 
   '';
 
 const SUPABASE_ANON_KEY = 
-  (typeof process !== 'undefined' && process.env ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : '') ||
-  (typeof process !== 'undefined' && process.env ? process.env.VITE_SUPABASE_ANON_KEY : '') ||
-  (typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env.VITE_SUPABASE_ANON_KEY : '') ||
+  getEnv('VITE_SUPABASE_ANON_KEY') || 
+  getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 
   '';
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
