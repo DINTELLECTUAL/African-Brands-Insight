@@ -20,7 +20,7 @@ export interface BrandPerception {
   country: string;
   logoChar: string;
   overallScore: number;
-  sentimentLabel: 'Highly Positive' | 'Steady' | 'Improving' | 'Mixed';
+  sentimentLabel: 'Highly Positive' | 'Steady' | 'Improving' | 'Mixed' | 'Insufficient Data';
   metrics: {
     trust: number;
     responsiveness: number;

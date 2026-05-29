@@ -9,7 +9,11 @@ import {
   Filter, 
   AlertCircle, 
   CheckCircle2,
-  Activity
+  Activity,
+  Search,
+  X,
+  TrendingUp,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrandPerception, PublicFeedback } from '../types';
@@ -19,14 +23,16 @@ import {
   generateSessionDeviceHash 
 } from '../utils/moderation';
 import { EditorialText } from './EditorialText';
+import { SentimentChart } from './SentimentChart';
 
 interface BrandDashboardProps {
   brand: BrandPerception;
+  allBrands?: BrandPerception[];
   onAddFeedback: (feedback: Omit<PublicFeedback, 'id' | 'date' | 'votes'>) => void;
   onVoteFeedback: (feedbackId: string, type: 'praise' | 'suggestion') => void;
 }
 
-export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDashboardProps) {
+export function BrandDashboard({ brand, allBrands = [], onAddFeedback, onVoteFeedback }: BrandDashboardProps) {
   const [insightType, setInsightType] = useState<'positive' | 'suggestion' | 'insight'>('positive');
   const [content, setContent] = useState('');
   const [userName, setUserName] = useState('');
@@ -220,7 +226,7 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: Insight Submission Card */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white border-2 border-[#082D20] rounded-2xl overflow-hidden shadow-[0_12px_44px_rgba(8,45,32,0.08)] relative group transition-all duration-300 hover:border-[#E6A71B]/85 hover:shadow-[0_16px_48px_rgba(8,45,32,0.12)]">
+          <div id="active-submission-node" className="bg-white border-2 border-[#082D20] rounded-2xl overflow-hidden shadow-[0_12px_44px_rgba(8,45,32,0.08)] relative group transition-all duration-300 hover:border-[#E6A71B]/85 hover:shadow-[0_16px_48px_rgba(8,45,32,0.12)]">
             {/* Elegant Tech Banner */}
             <div className="bg-gradient-to-r from-[#082D20] to-[#041A13] px-6 py-4.5 border-b-2 border-[#E6A71B]/35 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -473,16 +479,33 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
             </div>
           </div>
 
+          {/* Sentiment Stability Vector Chart */}
+          <div className="mb-6">
+            <SentimentChart data={brand.trendData} />
+          </div>
+
           {/* Feed items stream */}
           <div className="space-y-6">
             {allInsights.length === 0 ? (
-              <div className="py-20 text-center border-2 border-dashed border-[#082D20]/15 rounded-2xl bg-[#FAF8F2] p-8">
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#B8810E] font-black block mb-2">
-                  Zero Intelligence Footprints Available
+              <div className="py-20 text-center border-2 border-[#082D20]/15 rounded-2xl bg-white p-8 flex flex-col items-center justify-center space-y-4 shadow-sm">
+                <span className="w-12 h-12 rounded-full bg-[#FAF8F2] flex items-center justify-center border border-[#082D20]/5 text-[#E6A71B]">
+                  <MessageSquare className="w-6 h-6 text-[#E6A71B]" />
                 </span>
-                <p className="text-xs text-[#082D20]/75 font-sans font-medium mt-1">
-                  Be the first to submit an authentic, constructive public insight on this entity.
-                </p>
+                <div>
+                  <h4 className="text-[#082D20] font-black text-sm font-sans block">
+                    This profile has no public insights yet.
+                  </h4>
+                  <p className="text-xs text-[#082D20]/65 font-sans font-medium mt-1 max-w-sm mx-auto">
+                    Be the first to contribute a Commendation, Suggestion, or Technical Insight.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('active-submission-node')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-5 py-2.5 bg-[#082D20] text-[#FAF8F2] font-black font-mono text-[10px] uppercase rounded-xl border border-[#E6A71B]/50 hover:border-[#E6A71B] transition-all hover:shadow-md cursor-pointer tracking-wider"
+                >
+                  Submit Insight
+                </button>
               </div>
             ) : (
               allInsights.map((feedItem) => {
@@ -578,6 +601,409 @@ export function BrandDashboard({ brand, onAddFeedback, onVoteFeedback }: BrandDa
           </div>
         </div>
       </div>
+
+      {/* --- PREMIUM PERCEPTION BENCHMARKING SECTION --- */}
+      {(() => {
+        // Dynamic benchmarking state integration
+        const [peerSearchQuery, setPeerSearchQuery] = useState('');
+        const [peerSearchFocused, setPeerSearchFocused] = useState(false);
+        const [selectedPeerId, setSelectedPeerId] = useState('');
+
+        const industryAverage = useMemo(() => {
+          const sectorBrands = allBrands.filter(b => b.sector.toLowerCase() === brand.sector.toLowerCase());
+          
+          if (sectorBrands.length > 0) {
+            const count = sectorBrands.length;
+            return {
+              name: `${brand.sector} Average`,
+              overallScore: Math.round(sectorBrands.reduce((sum, b) => sum + b.overallScore, 0) / count),
+              trust: Math.round(sectorBrands.reduce((sum, b) => sum + b.metrics.trust, 0) / count),
+              responsiveness: Math.round(sectorBrands.reduce((sum, b) => sum + b.metrics.responsiveness, 0) / count),
+              innovation: Math.round(sectorBrands.reduce((sum, b) => sum + b.metrics.innovation, 0) / count),
+              socialResponsibility: Math.round(sectorBrands.reduce((sum, b) => sum + b.metrics.socialResponsibility, 0) / count),
+            };
+          }
+
+          return {
+            name: `${brand.sector} Sector Benchmark`,
+            overallScore: 80,
+            trust: 78,
+            responsiveness: 74,
+            innovation: 82,
+            socialResponsibility: 76,
+          };
+        }, [allBrands, brand.sector]);
+
+        const selectablePeers = useMemo(() => {
+          return allBrands.filter(b => 
+            b.id !== brand.id && 
+            (b.name.toLowerCase().includes(peerSearchQuery.toLowerCase()) ||
+             b.sector.toLowerCase().includes(peerSearchQuery.toLowerCase()))
+          );
+        }, [allBrands, peerSearchQuery, brand.id]);
+
+        const comparisonBrand = useMemo(() => {
+          return allBrands.find(b => b.id === selectedPeerId);
+        }, [allBrands, selectedPeerId]);
+
+        const aiComparativeSummary = useMemo(() => {
+          const sectorName = brand.sector.toLowerCase();
+          
+          const trustDelta = brand.metrics.trust - industryAverage.trust;
+          const innovDelta = brand.metrics.innovation - industryAverage.innovation;
+          const respDelta = brand.metrics.responsiveness - industryAverage.responsiveness;
+
+          let trustPhrase = '';
+          if (trustDelta > 5) {
+            trustPhrase = `Public perception indicates exceptional sovereign trust indexes (+${trustDelta}%) above the ${sectorName} industry standard, reflecting resilient pan-African brand positioning.`;
+          } else if (trustDelta < -5) {
+            trustPhrase = `Trust metrics register slightly softer than industry benchmarks (-${Math.abs(trustDelta)}%), suggesting localized communications adjustments or consumer confidence reinforcement is required.`;
+          } else {
+            trustPhrase = `Consensus trust scores align standardly within typical ${sectorName} bounds.`;
+          }
+
+          let innovPhrase = '';
+          if (innovDelta > 5) {
+            innovPhrase = `Systemic innovation metrics (+${innovDelta}%) illustrate excellent digital-first growth and technological design authority, consistently leading category peers.`;
+          } else if (innovDelta < -5) {
+            innovPhrase = `The engine identifies an innovation deficit compared to category peers. Targeted technical upgrades can help regain dynamic competitive positioning.`;
+          } else {
+            innovPhrase = `Product development and system adaptability benchmarks remain stable alongside industry averages.`;
+          }
+
+          let respPhrase = '';
+          if (respDelta > 5) {
+            respPhrase = `Customer support transparency and direct feedback responsiveness index strongly (+${respDelta}%), highlighting elite consumer engagement loops.`;
+          } else if (respDelta < -5) {
+            respPhrase = `Constructive suggestions highlight localized friction points; institutional response speeds are currently softer (-${Math.abs(respDelta)}%) than average.`;
+          } else {
+            respPhrase = `Registry response latency mirrors the standard sector operations.`;
+          }
+
+          const comparisonBrandPhrase = comparisonBrand 
+            ? `Direct cross-entity calibration against ${comparisonBrand.name} reveals ${
+                brand.overallScore > comparisonBrand.overallScore 
+                  ? `a slight sovereign lead of +${(brand.overallScore - comparisonBrand.overallScore).toFixed(1)}% in unified consensus indexes.` 
+                  : `a margin of review to capture ${comparisonBrand.name}'s current ${(comparisonBrand.overallScore - brand.overallScore).toFixed(0)}% perception advantage.`
+              }`
+            : `Select another regional registry to activate direct cross-entity peer intelligence metrics.`;
+
+          return {
+            executiveBrief: `The consensus engine observes that ${brand.name} possesses a robust strategic profile inside ${brand.sector}. ${trustPhrase} ${innovPhrase}`,
+            operationalInsight: `Operational analysis indicates that ${respPhrase} ${comparisonBrandPhrase}`,
+          };
+        }, [brand, industryAverage, comparisonBrand]);
+
+        return (
+          <div className="border-t-2 border-[#082D20]/10 pt-12 mt-12 space-y-8">
+            {/* Header Title Block */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="text-left space-y-1.5">
+                <span className="text-[10px] uppercase font-mono font-black text-[#B8810E] tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E6A71B]" />
+                  REGIONAL ECOSYSTEM ANALYSIS
+                </span>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-[#082D20] tracking-tight font-display">
+                  Adaptive Perception Benchmarking
+                </h3>
+                <p className="text-xs text-[#082D20]/65 max-w-2xl font-sans font-medium">
+                  Calibrate public signals, operational parameters, and trust indexes relative to sector averages and secondary enterprise registries.
+                </p>
+              </div>
+            </div>
+
+            {/* Core comparative grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-2">
+              {/* Left Panel (4 Cols): Search Peer & AI Executive Brief */}
+              <div className="lg:col-span-4 flex flex-col justify-between gap-6">
+                <div className="bg-white border-2 border-[#082D20]/10 rounded-2xl p-5 md:p-6 space-y-5 text-left shadow-xs flex-1 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-wider block">
+                      // 01 / Select Calibration Target
+                    </span>
+                    <div className="space-y-2 relative">
+                      <label className="text-[10px] font-mono font-bold text-[#082D20]/60 block uppercase">
+                        Secondary Comparison Enterprise
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={peerSearchQuery}
+                          onFocus={() => setPeerSearchFocused(true)}
+                          onBlur={() => setTimeout(() => setPeerSearchFocused(false), 200)}
+                          onChange={(e) => setPeerSearchQuery(e.target.value)}
+                          placeholder={comparisonBrand ? comparisonBrand.name : "Search enterprise profile..."}
+                          className="w-full px-3 py-2.5 pl-9 rounded-xl border-2 border-[#082D20]/15 focus:border-[#E6A71B] focus:bg-white focus:outline-none text-xs font-bold bg-[#FAF8F2] text-[#082D20] transition-all"
+                        />
+                        <Search className="w-3.5 h-3.5 text-[#082D20]/45 absolute left-3 top-3.5" />
+                        {selectedPeerId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedPeerId('');
+                              setPeerSearchQuery('');
+                            }}
+                            className="absolute right-3 top-3 text-[#0a4d3a]/60 hover:text-red-700 font-bold"
+                          >
+                            <X className="w-4 h-4 cursor-pointer" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Searched Peers suggestions List drop-down */}
+                      <AnimatePresence>
+                        {peerSearchFocused && selectablePeers.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="absolute left-0 right-0 mt-1.5 bg-white border-2 border-[#082D20]/10 rounded-xl shadow-lg z-30 max-h-48 overflow-y-auto"
+                          >
+                            {selectablePeers.slice(0, 5).map((p) => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onMouseDown={() => {
+                                  setSelectedPeerId(p.id);
+                                  setPeerSearchQuery(p.name);
+                                }}
+                                className="w-full text-left px-3 py-2.5 hover:bg-[#E6A71B]/12 text-xs font-bold text-[#082D20] border-b border-[#082D20]/5 last:border-b-0 flex justify-between items-center transition-colors cursor-pointer"
+                              >
+                                <span>{p.name}</span>
+                                <span className="text-[10px] text-[#082D20]/40 font-normal uppercase">{p.sector}</span>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <p className="text-[10px] text-[#082D20]/60 leading-relaxed font-mono">
+                      Comparing {brand.name} with the {brand.sector} space average {comparisonBrand ? `and peer agency ${comparisonBrand.name}.` : ''}
+                    </p>
+                  </div>
+
+                  {/* AI Intelligence Summary Card */}
+                  <div className="bg-[#FAF8F2]/75 border border-[#082D20]/10 p-4.5 rounded-xl space-y-3 mt-4">
+                    <div className="flex items-center gap-1.5 text-[9px] font-mono font-black text-[#B8810E] uppercase pb-1.5 border-b border-[#082D20]/5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#E6A71B]" />
+                      <span>REAL-TIME COGNITIVE INTELLIGENCE</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-[#082D20]/90 font-sans font-bold">
+                      {aiComparativeSummary.executiveBrief}
+                    </p>
+                    <p className="text-[10px] leading-relaxed text-[#082D20]/65 font-mono">
+                      {aiComparativeSummary.operationalInsight}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Panel (8 Cols): Beautiful comparative graphs & metrics bars */}
+              <div className="lg:col-span-8 bg-white border-2 border-[#082D20]/10 rounded-2xl p-6 text-left shadow-xs space-y-6 flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-3 border-b border-[#082D20]/15">
+                  <span className="text-[10px] font-mono font-black text-[#B8810E] uppercase tracking-wider flex items-center gap-2">
+                    // 02 / Strategic Sector Calibrator
+                  </span>
+                  
+                  {/* Legend Indicators */}
+                  <div className="flex items-center gap-4 text-[9px] font-mono font-bold">
+                    <span className="flex items-center gap-1.5 text-[#082D20]">
+                      <span className="w-2.5 h-1.5 rounded-sm bg-[#082D20]" />
+                      {brand.name}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[#B8810E]">
+                      <span className="w-2.5 h-1.5 rounded-sm bg-[#E6A71B]" />
+                      Sector Average
+                    </span>
+                    {comparisonBrand && (
+                      <span className="flex items-center gap-1.5 text-indigo-700">
+                        <span className="w-2.5 h-1.5 rounded-sm bg-indigo-600" />
+                        {comparisonBrand.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Elegant Metrics Comparison Display Rows */}
+                <div className="space-y-6 flex-1 flex flex-col justify-around">
+                  {[
+                    { 
+                      key: 'trust', 
+                      label: 'Public Trust Signal', 
+                      brandVal: brand.metrics.trust, 
+                      avgVal: industryAverage.trust, 
+                      compVal: comparisonBrand?.metrics.trust,
+                      desc: 'Confidence density mapped through secure, long-term regional resident surveys.' 
+                    },
+                    { 
+                      key: 'innovation', 
+                      label: 'Strategic Innovation Index', 
+                      brandVal: brand.metrics.innovation, 
+                      avgVal: industryAverage.innovation, 
+                      compVal: comparisonBrand?.metrics.innovation,
+                      desc: 'Praise for systems modernization, product adaptability, and pan-African alignment.' 
+                    },
+                    { 
+                      key: 'responsiveness', 
+                      label: 'Operational Responsiveness', 
+                      brandVal: brand.metrics.responsiveness, 
+                      avgVal: industryAverage.responsiveness, 
+                      compVal: comparisonBrand?.metrics.responsiveness,
+                      desc: 'Integrity rating for localized complaint servicing and transparency response speeds.' 
+                    },
+                    { 
+                      key: 'csr', 
+                      label: 'Social Impact / CSR Resonance', 
+                      brandVal: brand.metrics.socialResponsibility, 
+                      avgVal: industryAverage.socialResponsibility, 
+                      compVal: comparisonBrand?.metrics.socialResponsibility,
+                      desc: 'Socio-economic impact indices and community empowerment indicators.' 
+                    }
+                  ].map((item) => (
+                    <div key={item.key} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-xs font-bold text-[#082D20] font-sans block">{item.label}</span>
+                          <p className="text-[9px] text-[#082D20]/45 font-mono">{item.desc}</p>
+                        </div>
+                        {/* Scores summary align */}
+                        <div className="flex items-center gap-3.5 text-xs font-mono font-black">
+                          <span className="text-[#082D20]">{item.brandVal}%</span>
+                          <span className="text-[#B8810E]">{item.avgVal}%</span>
+                          {comparisonBrand && item.compVal !== undefined && (
+                            <span className="text-indigo-700">{item.compVal}%</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Layered comparison Progress bars custom graphic */}
+                      <div className="space-y-1.5 bg-[#FAF8F2] p-2.5 rounded-xl border border-[#082D20]/5">
+                        {/* Current Brand Line */}
+                        <div className="relative h-2 bg-neutral-200/50 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="absolute top-0 left-0 h-full bg-[#082D20] rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${item.brandVal}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
+                        {/* Industry Average Line */}
+                        <div className="relative h-1 bg-neutral-200/50 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="absolute top-0 left-0 h-full bg-[#E6A71B]"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${item.avgVal}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
+                        {/* Companion comparison Line if loaded */}
+                        {comparisonBrand && item.compVal !== undefined && (
+                          <div className="relative h-1 bg-neutral-200/50 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="absolute top-0 left-0 h-full bg-indigo-600"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${item.compVal}%` }}
+                              transition={{ duration: 0.8, ease: "easeOut" }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-Bento Dashboard Grid for qualitative indexes */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+              {/* Card 1: Customer Experience Mentions */}
+              <div className="bg-white border-2 border-[#082D20]/10 rounded-2xl p-5 space-y-3 text-left hover:border-[#E6A71B]/35 transition-all shadow-3xs">
+                <div className="flex items-center justify-between border-b border-[#082D20]/5 pb-2">
+                  <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-wider block">
+                    // QUALITATIVE KPI 01
+                  </span>
+                  <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-extrabold uppercase animate-pulse">
+                    Optimizing
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-[#082D20]/45 block">Customer Experience Signal</span>
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl font-black text-[#082D20] font-sans">
+                    {brand.metrics.responsiveness > 75 ? 'Excellent' : 'Stable'}
+                  </span>
+                  <span className="text-[10px] text-[#082D20]/65 font-mono">
+                    (Avg: {industryAverage.responsiveness > 75 ? 'Excellent' : 'Stable'})
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#082D20]/75 leading-relaxed font-sans">
+                  Aggregates feedback indexing localized support velocity, payment flow stability, and transparent dispute intervals.
+                </p>
+              </div>
+
+              {/* Card 2: Innovation mentions */}
+              <div className="bg-white border-2 border-[#082D20]/10 rounded-2xl p-5 space-y-3 text-left hover:border-[#E6A71B]/35 transition-all shadow-3xs">
+                <div className="flex items-center justify-between border-b border-[#082D20]/5 pb-2">
+                  <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-wider block">
+                    // QUALITATIVE KPI 02
+                  </span>
+                  <span className="text-[10px] font-mono text-[#B8810E] bg-[#E6A71B]/10 px-2 py-0.5 rounded border border-[#E6A71B]/30 font-extrabold uppercase">
+                    Expanding
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-[#082D20]/45 block">Digital Adaptability Index</span>
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl font-black text-[#082D20] font-sans">
+                    {brand.metrics.innovation > 83 ? 'High Frontier' : 'Pioneer'}
+                  </span>
+                  <span className="text-[10px] text-[#082D20]/65 font-mono">
+                    (Avg: {industryAverage.innovation > 83 ? 'High Frontier' : 'Pioneer'})
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#082D20]/75 leading-relaxed font-sans">
+                  Tracks dynamic references to 5G infrastructure, API accessibility, and pan-African integration strategies.
+                </p>
+              </div>
+
+              {/* Card 3: Feedback classification ratios */}
+              <div className="bg-white border-2 border-[#082D20]/10 rounded-2xl p-5 space-y-3 text-left hover:border-[#E6A71B]/35 transition-all shadow-3xs">
+                <div className="flex items-center justify-between border-b border-[#082D20]/5 pb-2">
+                  <span className="text-[9px] font-mono font-black text-[#B8810E] uppercase tracking-wider block">
+                    // CLASSIFICATION DENSITY
+                  </span>
+                  <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-extrabold uppercase font-mono">
+                    Telemetry Ratio
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-[#082D20]/45 block">Commendation vs Sug. vs Tech</span>
+                {/* Clean horizontal ratio layout */}
+                <div className="space-y-2 pt-1 font-mono">
+                  <div className="flex h-3 w-full rounded-full overflow-hidden border border-neutral-200 bg-neutral-100">
+                    <div style={{ width: `${brand.metrics.trust}%` }} className="h-full bg-emerald-500" title="Commendation Index" />
+                    <div style={{ width: `${(100 - brand.metrics.trust) * 0.6}%` }} className="h-full bg-amber-500" title="Constructive Suggestion" />
+                    <div style={{ width: `${(100 - brand.metrics.trust) * 0.4}%` }} className="h-full bg-indigo-500" title="Technical Insight" />
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#082D20]/60">
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                      {brand.metrics.trust}% Comm.
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                      {Math.round((100 - brand.metrics.trust) * 0.6)}% Sug.
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                      {Math.round((100 - brand.metrics.trust) * 0.4)}% Tech.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
 }

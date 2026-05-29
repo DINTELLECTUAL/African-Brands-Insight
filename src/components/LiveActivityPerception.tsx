@@ -9,78 +9,36 @@ interface ActivityItem {
   timeLabel: string;
 }
 
-const CURATED_ACTIVITIES: Omit<ActivityItem, 'id'>[] = [
-  { category: 'Commendation', text: 'New commendation submitted for Flutterwave', timeLabel: 'just now' },
-  { category: 'Technical', text: 'Insight added for MTN Nigeria', timeLabel: '1m ago' },
-  { category: 'Suggestion', text: 'Suggestion shared about customer experience', timeLabel: '2m ago' },
-  { category: 'Technical', text: 'Technical feedback posted for Paystack', timeLabel: '4m ago' },
-  { category: 'Commendation', text: 'Community members praised recent improvements', timeLabel: '3m ago' },
-  { category: 'Technical', text: 'New public insight added for Dangote Group', timeLabel: '6m ago' },
-  { category: 'Perception', text: 'Brand perception updated for Safaricom', timeLabel: 'recently' },
-  { category: 'Technical', text: 'Fresh audience insight submitted on PiggyVest', timeLabel: 'just now' },
-  { category: 'Commendation', text: 'Commendation updated for Chicken Republic', timeLabel: 'recently' },
-  { category: 'Suggestion', text: 'Regional customer experience suggestion submitted', timeLabel: '9m ago' },
-  { category: 'Technical', text: 'Pan-African tech registry updated successfully', timeLabel: 'recently' },
-  { category: 'Technical', text: 'Verification complete: audit trail logged for Burna Boy', timeLabel: 'recently' },
-];
-
 export function LiveActivityPerception() {
   const [activeItem, setActiveItem] = useState<ActivityItem | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const displayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Helper to trigger a new random activity
-  const triggerNextActivity = (forcedItem?: Omit<ActivityItem, 'id'>) => {
-    // Clear display timers
+  // Helper to trigger a new user-contributed activity indicator
+  const triggerNextActivity = (item: Omit<ActivityItem, 'id'>) => {
+    // Clear active timers
     if (displayTimerRef.current) {
       clearTimeout(displayTimerRef.current);
     }
 
-    // Dismiss current
+    // Dismiss active panel
     setActiveItem(null);
 
-    // Short delay before showing next to make transition pristine
+    // Minor delay before showing next contribution for screen pacing
     setTimeout(() => {
-      const itemToUse = forcedItem || CURATED_ACTIVITIES[Math.floor(Math.random() * CURATED_ACTIVITIES.length)];
       setActiveItem({
-        ...itemToUse,
+        ...item,
         id: `${Date.now()}-${Math.random()}`,
       });
 
-      // Automatically dismiss after 8 seconds of visibility unless paused
+      // Close automatically in 8 seconds
       displayTimerRef.current = setTimeout(() => {
-        dismissCurrentActivity();
+        setActiveItem(null);
       }, 8000);
     }, 400);
   };
 
-  const dismissCurrentActivity = () => {
-    if (isPaused) return; // Keep it alive while hovering
-    setActiveItem(null);
-  };
-
-  // Schedule next randomized Calm activity interval
-  const scheduleNextCalmInterval = (firstRun = false) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // First appearance is early (6 seconds) so user gets treated to this amazing UI immediately
-    // Subsequent appearances are randomized calm (22 to 45 seconds)
-    const delay = firstRun ? 6000 : Math.floor(Math.random() * (45000 - 22000 + 1)) + 22000;
-
-    timeoutRef.current = setTimeout(() => {
-      triggerNextActivity();
-      scheduleNextCalmInterval(false);
-    }, delay);
-  };
-
   useEffect(() => {
-    // Initialize standard schedule
-    scheduleNextCalmInterval(true);
-
-    // Listen to real live user submission events on window (zero-cost elegant coupling)
+    // Elegant system coupling: listen strictly to real-time events on window
     const handleNewLiveSubmission = (e: Event) => {
       const customEvent = e as CustomEvent<{ brandName: string; sentiment: string; user: string }>;
       if (customEvent.detail) {
@@ -97,9 +55,9 @@ export function LiveActivityPerception() {
           actionWord = 'shared a suggestion for';
         }
 
-        const activityText = `${user} ${actionWord} ${brandName || 'a brand'}`;
+        const username = user || 'A verified citizen';
+        const activityText = `${username} ${actionWord} ${brandName || 'a brand'}`;
         
-        // Instantly display real-time contribution
         triggerNextActivity({
           category,
           text: activityText,
@@ -111,27 +69,10 @@ export function LiveActivityPerception() {
     window.addEventListener('new-insight-submitted', handleNewLiveSubmission);
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (displayTimerRef.current) clearTimeout(displayTimerRef.current);
       window.removeEventListener('new-insight-submitted', handleNewLiveSubmission);
     };
-  }, [isPaused]);
-
-  // Handle manual hover state update
-  const handleMouseEnter = () => {
-    setIsPaused(true);
-    if (displayTimerRef.current) {
-      clearTimeout(displayTimerRef.current);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsPaused(false);
-    // Restart dismiss timer (dismiss in 3s after leaving)
-    displayTimerRef.current = setTimeout(() => {
-      setActiveItem(null);
-    }, 3000);
-  };
+  }, []);
 
   // Icon mapping helper
   const renderCategoryIcon = (category: ActivityItem['category']) => {
@@ -160,21 +101,18 @@ export function LiveActivityPerception() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
             className="pointer-events-auto w-full p-3 sm:p-3.5 bg-[#FAF8F2]/95 backdrop-blur-md rounded-xl border-2 border-[#E6A71B]/35 shadow-[0_4px_24px_rgba(8,45,32,0.12)] hover:border-[#E6A71B]/70 hover:shadow-[0_6px_32px_rgba(8,45,32,0.18)] transition-all duration-300 flex items-start gap-3 select-none"
           >
             {/* Visual Icon with relative pulse dot container */}
             <div className="relative flex items-center justify-center p-2 rounded-lg bg-[#082D20]/5 border border-[#E6A71B]/20 shrink-0">
               {renderCategoryIcon(activeItem.category)}
-              {/* Continuous micro glowing pulse indicator */}
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"></span>
               </span>
             </div>
 
-            {/* Core textual message detail */}
+            {/* Core message text details */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="text-[9px] font-mono uppercase font-black tracking-wider text-[#B8810E]">
@@ -190,7 +128,6 @@ export function LiveActivityPerception() {
               </p>
             </div>
             
-            {/* Tiny close tap target for mobile convenience */}
             <button 
               onClick={() => setActiveItem(null)}
               className="text-[#082D20]/30 hover:text-[#082D20]/60 p-0.5 text-[10px] sm:text-xs font-bold leading-none cursor-pointer select-none border border-transparent hover:border-[#E6A71B]/15 rounded transition-all"

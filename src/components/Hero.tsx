@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, ShieldCheck, ArrowUpRight, HelpCircle, Terminal, Search, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrandPerception } from '../types';
@@ -13,6 +13,92 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
   const [category, setCategory] = useState('Brand');
   const [errorText, setErrorText] = useState('');
   const [inputHasFocus, setInputHasFocus] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Real-time living engine states for premium interactive intelligence feel
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexingProgress, setIndexingProgress] = useState(0);
+  const [statusText, setStatusText] = useState('SYSTEM IDLE // SECURE CONSENSUS STANDBY');
+
+  const typingTimeoutRef = useRef<any>(null);
+  const progressIntervalRef = useRef<any>(null);
+  const statusRotateIntervalRef = useRef<any>(null);
+
+  const statusPhrases = [
+    'Indexing regional public perception...',
+    'Analyzing brand resonance parameters...',
+    'Scanning decentralized consensus registry...',
+    'Mapping authentic signal vectors...',
+    'Verifying integrity telemetry files...',
+    'Computing regional sentiment indices...',
+    'Constructing signal space graph...'
+  ];
+
+  useEffect(() => {
+    if (!searchValue.trim()) {
+      setIsIndexing(false);
+      setIndexingProgress(0);
+      setStatusText('SYSTEM IDLE // SECURE CONSENSUS STANDBY');
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (statusRotateIntervalRef.current) clearInterval(statusRotateIntervalRef.current);
+      return;
+    }
+
+    // Trigger active real-time index sequence
+    setIsIndexing(true);
+
+    // Dynamic rotation of infrastructural status messages
+    if (!statusRotateIntervalRef.current) {
+      let phaseIndex = 0;
+      setStatusText(`INDEXING PROTOCOL ACTIVE: ${statusPhrases[0]}`);
+      statusRotateIntervalRef.current = setInterval(() => {
+        phaseIndex = (phaseIndex + 1) % statusPhrases.length;
+        setStatusText(`INDEXING PROTOCOL ACTIVE: ${statusPhrases[phaseIndex]}`);
+      }, 1500);
+    }
+
+    // Organic irregular progress filling mimicking heavy asynchronous indexing calculations
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = setInterval(() => {
+      setIndexingProgress((prev) => {
+        if (prev >= 92) {
+          return Math.min(prev + 0.4, 98); // Slow near 98% to simulate computation depth
+        }
+        return prev + Math.floor(Math.random() * 9) + 4;
+      });
+    }, 120);
+
+    // Debounce to resolve matching on typing pauses
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (statusRotateIntervalRef.current) clearInterval(statusRotateIntervalRef.current);
+      progressIntervalRef.current = null;
+      statusRotateIntervalRef.current = null;
+
+      setIndexingProgress(100);
+      setStatusText('SOVEREIGN TELEMETRY MATCHED // STANDBY FOR BROADCAST');
+
+      // Keep complete match line momentarily active before elegant decay
+      setTimeout(() => {
+        setIndexingProgress(0);
+        setIsIndexing(false);
+      }, 1400);
+    }, 1000);
+
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, [searchValue]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (statusRotateIntervalRef.current) clearInterval(statusRotateIntervalRef.current);
+    };
+  }, []);
 
   const categories = [
     'Brand',
@@ -45,8 +131,77 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
   return (
     <section id="hero" className="w-full relative min-h-screen flex flex-col justify-center pt-32 pb-24 bg-[#FAF8F2] overflow-hidden">
       {/* Visual Alignment Lines - Extremely quiet, sovereign-scale background */}
-      <div className="absolute inset-x-0 top-0 h-[650px] pointer-events-none opacity-25">
+      <div className="absolute inset-x-0 top-0 h-[650px] pointer-events-none opacity-25 z-0">
         <div className="w-full h-full bg-[radial-gradient(#082D20_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_70%,transparent_100%)]" />
+      </div>
+
+      {/* Atmospheric Editorial Illustrations Layer */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+        {/* Left Side Subdued Structural Architectural Asset */}
+        <motion.div 
+          className="absolute -left-10 lg:left-0 top-[15%] w-[380px] md:w-[500px] lg:w-[650px] aspect-[16/9] opacity-8 mix-blend-darken hover:opacity-12 transition-opacity duration-1000"
+          style={{ 
+            maskImage: 'radial-gradient(circle at 10% 40%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 80%)', 
+            WebkitMaskImage: 'radial-gradient(circle at 10% 40%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 80%)' 
+          }}
+          animate={{
+            y: [-8, 8, -8],
+            x: [-4, 4, -4],
+            rotate: [-0.5, 0.5, -0.5],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <img 
+            src="/src/assets/images/ambient_african_insight_hq_1780058039166.png" 
+            alt="Sovereign African Enterprise Architecture Map" 
+            className="w-full h-full object-cover filter grayscale contrast-125 saturate-50"
+            referrerPolicy="no-referrer"
+          />
+        </motion.div>
+
+        {/* Right Side Subdued Leadership Dialogue Asset */}
+        <motion.div 
+          className="absolute -right-16 lg:right-0 bottom-[12%] w-[380px] md:w-[500px] lg:w-[650px] aspect-[16/9] opacity-10 mix-blend-darken hover:opacity-15 transition-opacity duration-1000"
+          style={{ 
+            maskImage: 'radial-gradient(circle at 85% 65%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 80%)', 
+            WebkitMaskImage: 'radial-gradient(circle at 85% 65%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 80%)' 
+          }}
+          animate={{
+            y: [10, -10, 10],
+            x: [5, -5, 5],
+            rotate: [0.3, -0.3, 0.3],
+          }}
+          transition={{
+            duration: 22,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <img 
+            src="/src/assets/images/ambient_leadership_network_1780058058304.png" 
+            alt="Sovereign African Network & Public Signal Intelligence" 
+            className="w-full h-full object-cover filter grayscale contrast-125 saturate-50"
+            referrerPolicy="no-referrer"
+          />
+        </motion.div>
+
+        {/* Ambient Warm Golden Sun Glow Light Leak */}
+        <motion.div 
+          className="absolute top-[20%] left-[25%] right-[25%] h-[400px] rounded-full bg-gradient-to-tr from-[#E6A71B]/3 via-transparent to-[#0D4130]/3 filter blur-3xl pointer-events-none -z-10"
+          animate={{
+            opacity: [0.4, 0.8, 0.4],
+            scale: [0.95, 1.05, 0.95],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 md:px-12 w-full relative z-10 text-center flex flex-col items-center">
@@ -92,21 +247,39 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
         >
           {/* Live Ecosystem Sovereign Aura - very subtle slow breathing blur */}
           <motion.div
-            className="absolute -inset-2 bg-gradient-to-r from-[#E6A71B]/15 via-[#0D4130]/10 to-[#E6A71B]/15 rounded-3xl blur-xl pointer-events-none -z-10"
+            className="absolute -inset-3 bg-gradient-to-r from-[#E6A71B]/18 via-[#0D4130]/12 to-[#E6A71B]/18 rounded-3xl blur-2xl pointer-events-none -z-10"
             animate={{
-              opacity: [0.4, 0.85, 0.4],
-              scale: [0.97, 1.03, 0.97],
+              opacity: inputHasFocus ? 0.95 : isHovered ? 0.75 : 0.45,
+              scale: inputHasFocus ? 1.02 : isHovered ? 1.01 : 0.98,
             }}
             transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1]
             }}
           />
 
-          <form
+          <motion.form
             onSubmit={handleSubmit}
-            className="p-3 bg-white rounded-2xl border-2 border-[#0D4130]/15 hover:border-[#E6A71B]/55 shadow-[0_12px_44px_rgba(8,45,32,0.06)] focus-within:ring-2 focus-within:ring-[#E6A71B]/35 focus-within:border-[#E6A71B] transition-all duration-500 relative z-10"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            animate={{
+              borderColor: inputHasFocus 
+                ? '#E6A71B' 
+                : isHovered 
+                ? 'rgba(230, 167, 27, 0.65)' 
+                : 'rgba(13, 65, 48, 0.15)',
+              boxShadow: inputHasFocus
+                ? '0 20px 50px rgba(8, 45, 32, 0.12)'
+                : isHovered
+                ? '0 16px 48px rgba(8, 45, 32, 0.09)'
+                : '0 12px 44px rgba(8, 45, 32, 0.05)',
+              y: inputHasFocus ? -2 : isHovered ? -1 : 0,
+            }}
+            transition={{
+              duration: 0.4,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+            className="p-3 bg-white rounded-2xl border-2 relative z-10 overflow-hidden"
           >
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
               {/* Primary Search Input field */}
@@ -117,7 +290,7 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
                   onFocus={() => setInputHasFocus(true)}
                   onBlur={() => setTimeout(() => setInputHasFocus(false), 200)} // slight delay to allow tap/clicks on matched brands
                   onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Enter a brand, business, creator or Celebrity..."
+                  placeholder="Enter a brand, business, creator or celebrity name..."
                   className="w-full bg-transparent px-2.5 py-3 text-[#082D20] text-xs sm:text-sm md:text-base font-bold placeholder:text-[11px] sm:placeholder:text-sm md:placeholder:text-base placeholder:text-[#082D20]/40 placeholder:font-semibold focus:outline-none"
                   aria-label="Brand or person query"
                 />
@@ -161,7 +334,61 @@ export function Hero({ onSearchAndRedirect, existingBrands = [] }: HeroProps) {
                 />
               </button>
             </div>
-          </form>
+
+            {/* Intelligent Indexing Progress Indicator - Ultra-thin, high contrast, smooth spring filler */}
+            <AnimatePresence>
+              {isIndexing && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-100 overflow-hidden"
+                >
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-emerald-500 via-[#E6A71B] to-emerald-600 rounded-r-sm"
+                    animate={{ width: `${indexingProgress}%` }}
+                    transition={{
+                      type: "spring",
+                      damping: 18,
+                      stiffness: 82,
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.form>
+
+          {/* Dynamic Living Engine Status Telemetry */}
+          <div className="h-6 flex items-center justify-between px-4 mt-2 select-none overflow-hidden text-left">
+            <AnimatePresence mode="wait">
+              {searchValue && (
+                <motion.div
+                  key={statusText}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E6A71B] animate-pulse" />
+                  <span className="text-[9px] font-mono tracking-wider uppercase font-black text-[#0D4130]/65">
+                    {statusText}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {searchValue && isIndexing && (
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                exit={{ opacity: 0 }}
+                className="text-[9px] font-mono tracking-wider font-extrabold text-[#0D4130]/40"
+              >
+                INDEX RATE: ~1.4GB/S
+              </motion.span>
+            )}
+          </div>
 
           {/* Prompted Existing Match Matches list container */}
           <AnimatePresence>

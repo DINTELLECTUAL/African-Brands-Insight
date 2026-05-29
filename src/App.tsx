@@ -4,7 +4,7 @@ import { Hero } from './components/Hero';
 import { BrandDashboard } from './components/BrandDashboard';
 import { LiveActivityPerception } from './components/LiveActivityPerception';
 
-import { BRANDS_DATA, findOrCreateBrand } from './brandsData';
+import { BRANDS_DATA, findOrCreateBrand, calculateDynamicMetrics } from './brandsData';
 import { BrandPerception, PublicFeedback } from './types';
 
 export default function App() {
@@ -13,7 +13,61 @@ export default function App() {
     const saved = localStorage.getItem('abi_sovereign_brands_v2');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((b: BrandPerception) => {
+            const hasMTNName = b.id === 'mtn-nigeria' || b.name?.toLowerCase().trim() === 'mtn nigeria';
+            const hasBurnaName = b.id === 'burna-boy' || b.id?.includes('burna') || b.name?.toLowerCase().includes('burna boy');
+            
+            if (hasMTNName) {
+              return {
+                id: 'mtn-nigeria',
+                name: 'MTN Nigeria',
+                sector: 'Telecom',
+                country: 'Pan-African',
+                logoChar: 'M',
+                overallScore: 0,
+                sentimentLabel: 'Insufficient Data',
+                metrics: {
+                  trust: 0,
+                  responsiveness: 0,
+                  innovation: 0,
+                  socialResponsibility: 0
+                },
+                traits: [],
+                aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
+                trendData: [],
+                praises: [],
+                suggestions: []
+              };
+            }
+
+            if (hasBurnaName) {
+              return {
+                id: b.id || 'burna-boy',
+                name: b.name || 'Burna Boy (Spaceship Ent.)',
+                sector: b.sector || 'Entertainment',
+                country: 'Pan-African',
+                logoChar: 'B',
+                overallScore: 0,
+                sentimentLabel: 'Insufficient Data',
+                metrics: {
+                  trust: 0,
+                  responsiveness: 0,
+                  innovation: 0,
+                  socialResponsibility: 0
+                },
+                traits: [],
+                aiSummary: "No public insights have been submitted for this entity yet. Submit a commendation, suggestion, or technical insight below to initialize systemic indexing.",
+                trendData: [],
+                praises: [],
+                suggestions: []
+              };
+            }
+
+            return b;
+          });
+        }
       } catch (e) {
         console.error("Local registry read failure, fallback to BRANDS_DATA", e);
       }
@@ -88,7 +142,7 @@ export default function App() {
     }
   };
 
-  // Handle addition of verified user insights
+  // Handle addition of verified user insights with 100% real dynamic calculation
   const handleAddFeedback = (feedbackInput: Omit<PublicFeedback, 'id' | 'date' | 'votes'>) => {
     const feedbackType = feedbackInput.sentiment;
     const todayStr = new Date().toLocaleDateString('en-US', {
@@ -117,14 +171,36 @@ export default function App() {
           ? [populatedFeedback, ...b.suggestions] 
           : b.suggestions;
 
-        // Perform dynamic micro adjusts to continuous consensus scores
-        const oldScore = b.overallScore;
-        const scoreDelta = feedbackType === 'positive' ? 1.5 : -1.0;
-        const newScore = Math.min(100, Math.max(50, parseFloat((oldScore + scoreDelta).toFixed(1))));
+        const dynamicMetrics = calculateDynamicMetrics(updatedPraises, updatedSuggestions);
+
+        // Update traits dynamically based on the balance of feedback
+        const updatedTraits = [];
+        if (updatedPraises.length > 0) updatedTraits.push('Community Praised');
+        if (updatedSuggestions.some(s => s.sentiment === 'insight')) updatedTraits.push('Sought Diagnostic');
+        if (updatedSuggestions.some(s => s.sentiment === 'suggestion')) updatedTraits.push('Active Customer Loop');
+        if (dynamicMetrics.overallScore >= 80) updatedTraits.push('High Trust Index');
+
+        // Compile cognitive AI Summary dynamically based on actual comments
+        let updatedAiSummary = b.aiSummary;
+        if (updatedPraises.length > 0 || updatedSuggestions.length > 0) {
+          const praisesHighlights = updatedPraises.slice(0, 2).map(p => `"${p.content.slice(0, 45)}..."`).join(' and ');
+          const suggestionsHighlights = updatedSuggestions.slice(0, 2).map(s => `"${s.content.slice(0, 45)}..."`).join(' and ');
+          
+          updatedAiSummary = `Our consensus engine has analyzed ${updatedPraises.length + updatedSuggestions.length} real user-generated public submissions for ${b.name}. `;
+          if (updatedPraises.length > 0) {
+            updatedAiSummary += `Commendations highlight positive feedback such as ${praisesHighlights}. `;
+          }
+          if (updatedSuggestions.length > 0) {
+            updatedAiSummary += `Constructive insights focus on potential growth areas, including ${suggestionsHighlights}. `;
+          }
+          updatedAiSummary += `This profile is dynamically updated with a live consensus score of ${dynamicMetrics.overallScore}%.`;
+        }
 
         return {
           ...b,
-          overallScore: newScore,
+          ...dynamicMetrics,
+          traits: updatedTraits,
+          aiSummary: updatedAiSummary,
           praises: updatedPraises,
           suggestions: updatedSuggestions,
         };
@@ -166,6 +242,7 @@ export default function App() {
         <main className="max-w-6xl mx-auto px-6 md:px-12 pt-32 pb-24 z-10 relative">
           <BrandDashboard 
             brand={activeBrand}
+            allBrands={brands}
             onAddFeedback={handleAddFeedback}
             onVoteFeedback={handleVoteFeedback}
           />
